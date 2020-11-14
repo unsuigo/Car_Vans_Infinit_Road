@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Game.UI
 {
     
-    public class TimeProgressBar : MonoBehaviour
+    public class FuelProgressBar : MonoBehaviour
     {
         [SerializeField] private Image _progressImage;
         [SerializeField] private TextMeshProUGUI _fuelLeftText;

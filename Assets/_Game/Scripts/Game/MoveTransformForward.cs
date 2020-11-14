@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 
@@ -15,6 +16,18 @@ public class MoveTransformForward : MonoBehaviour
       Observable.EveryUpdate()
          .Subscribe(x => MoveForward())
          .AddTo(this);
+   }
+
+
+   private void OnEnable()
+   {
+      PlayerController.onBoost += Boost;
+   }
+
+   private void OnDisable()
+   {
+      PlayerController.onBoost -= Boost;
+
    }
 
    private void  MoveForward()
@@ -44,8 +57,23 @@ public class MoveTransformForward : MonoBehaviour
 
    public void Boost()
    {
-      FastSpeed();
-      Tween tween = DOVirtual.DelayedCall(_boostTime, NormalSpeed);
+      var boostedSpeed = _moveSpeed * _boost;
+      Sequence mySequence = DOTween.Sequence();
+      
+      mySequence.Append(DOTween.To(
+         () => _moveSpeed,
+         x => _moveSpeed = x,
+         boostedSpeed,
+         _boostTime));
+      mySequence.Append(DOTween.To(
+         () => _moveSpeed,
+         x => _moveSpeed = x,
+         _speed,
+         0.9f));
+      mySequence.PrependInterval(_boostTime);
+      mySequence.Duration();
+      
+      // Tween tween = DOVirtual.DelayedCall(_boostTime, NormalSpeed);
    }
    
    

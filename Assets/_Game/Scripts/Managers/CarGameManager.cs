@@ -7,7 +7,7 @@ namespace Game
 {
     public class CarGameManager : MiniGames
     {
-        public static event Action sessionDoneAction;
+        public static event Action sessionFailAction;
         public static event Action sessionStartAction;
         public static Action<int> OnScoreCountChanged;
         
@@ -48,7 +48,7 @@ namespace Game
         public override void Fail()
         {
             base.Fail();
-            GameSessionDone();
+            GameSessionFail();
             Debug.Log("FAIL");
         }
         
@@ -69,17 +69,17 @@ namespace Game
             sessionStartAction?.Invoke();
         }
         
-        public void GameSessionDone()
+        public void GameSessionFail()
         {
-            AudioSystem.Instance.PlayOneShot(AudioClips.GameEnd);
+            // AudioSystem.Instance.PlayOneShot(AudioClips.GameEnd);
 
             // _timerPanel.SetActive(false);
            
-            sessionDoneAction?.Invoke();
+            sessionFailAction?.Invoke();
             CurrentGameState = GameState.None;
             LocalSettings.StarsGotQty = ScoreCount;
             
-            sessionDoneAction?.Invoke();
+            sessionFailAction?.Invoke();
         }
        
         public void GameSessionPaused()

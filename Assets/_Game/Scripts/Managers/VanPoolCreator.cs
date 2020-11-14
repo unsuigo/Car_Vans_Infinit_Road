@@ -77,7 +77,5 @@ public class VanPoolCreator : MonoBehaviour
     public void LastVanRichedCamera()
     {
         DeleteLastVan();
-        Debug.Log("LastVanRichedCamera " );
-        
     }
 }

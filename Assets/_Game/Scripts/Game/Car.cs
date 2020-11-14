@@ -12,14 +12,18 @@ public class Car : MonoBehaviour
    public static event OnScoreReceived onScore;
    
    public  static Action<float> onDamageReceived;
-   public  static Action onFuelFinished;
    public  static Action<float> onFuelChange;
+   public  static Action onFuelFinished;
+   public  static Action onSafeToConnectFuel;
+   public  static Action onUnsafeToConnectFuel;
    
    [SerializeField] private ShowReadyState _showReadyState;
    [SerializeField] private float _useFuelSpeed;
 
    private bool _isMoving;
+   private bool _canMoveUnderVan;
    private float _fuel = 0;
+   
 
    private void Start()
    {
@@ -55,12 +59,14 @@ public class Car : MonoBehaviour
    {
       Debug.Log("SafePlaceUnderVan");
       _showReadyState.SetReady();
+      onSafeToConnectFuel?.Invoke();
    }
    
    public void NotSafePlaceUnderVan()
    {
       Debug.Log("NOT SafePlaceUnderVan");
       _showReadyState.SetNotReady();
+      onUnsafeToConnectFuel?.Invoke();
    }
 
    public void ShowReadyState()
@@ -85,6 +91,8 @@ public class Car : MonoBehaviour
       onScore?.Invoke(score);
       // onScore(score);
    }
+   
+   
    
 }
 
