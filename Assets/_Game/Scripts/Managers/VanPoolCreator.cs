@@ -1,7 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
+
+namespace Game
+{
+    
 public class VanPoolCreator : MonoBehaviour
 {
     [SerializeField] GameObject[] _vanPrefabs;
@@ -13,17 +16,32 @@ public class VanPoolCreator : MonoBehaviour
     private GameObject[] _poolVans;
     private float _playerPosZ;
     private int _nextIndex = 0;
+    private bool _isPlaying = false;
     void Start()
     {
-        _player = GameObject.FindWithTag("Player").transform;
-        _playerPosZ = _player.position.z;
+       
+    }
 
-        FillVansPool();
-        SpawnVan(0);
+    private void OnEnable()
+    {
+        CarGameManager.sessionWinAction += OnStopGame;
+        CarGameManager.sessionStartAction += OnStartGame;
+        CarGameManager.sessionFailAction += OnStopGame;
+    }
+
+    private void OnDisable()
+    {
+        CarGameManager.sessionWinAction -= OnStopGame;
+        CarGameManager.sessionStartAction -= OnStartGame;
+        CarGameManager.sessionFailAction -= OnStopGame;
     }
 
     void Update()
     {
+        if (_player == null || !_isPlaying)
+        {
+            return;
+        }
         _playerPosZ = _player.position.z;
     }
     
@@ -49,17 +67,18 @@ public class VanPoolCreator : MonoBehaviour
     }
 
 
-    private void SpawnVan(int poolIndex)
+    private void SpawnVan()
     {
-        var van = _poolVans[poolIndex];
+        var van = _poolVans[_nextIndex];
         van.SetActive(true);
         var spawnPosition = van.transform.position;
         var posZ = _playerPosZ + _zSpawn;
         spawnPosition.z = posZ;
         van.transform.position = spawnPosition;
         _activeVans.Add(van);
+        
         _nextIndex++;
-        if (poolIndex >= _poolVans.Length-1)
+        if (_nextIndex >= _poolVans.Length-1)
         {
             _nextIndex = 0;
         }
@@ -71,11 +90,32 @@ public class VanPoolCreator : MonoBehaviour
         _activeVans.RemoveAt(0);
         van.SetActive(false);
         
-        SpawnVan(_nextIndex);
+        SpawnVan();
     }
 
     public void LastVanRichedCamera()
     {
         DeleteLastVan();
     }
+
+    private void OnStartGame()
+    {
+        _player = GameObject.FindWithTag("Player").transform;
+        _playerPosZ = _player.position.z;
+        _isPlaying = true;
+        FillVansPool();
+        SpawnVan();
+    }
+    private void OnStopGame()
+    {
+        _activeVans.Clear();
+        foreach (var van in _poolVans)
+        {
+            Destroy(van);
+        }
+
+        _isPlaying = false;
+    }
+}
+   
 }

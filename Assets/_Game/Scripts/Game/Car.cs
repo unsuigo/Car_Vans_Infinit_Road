@@ -23,7 +23,11 @@ public class Car : MonoBehaviour
    private bool _isMoving;
    private bool _canMoveUnderVan;
    private float _fuel = 0;
-   
+
+   private void OnEnable()
+   {
+      VCameraManager.Instance.ConnectToPlayer(transform);
+   }
 
    private void Start()
    {

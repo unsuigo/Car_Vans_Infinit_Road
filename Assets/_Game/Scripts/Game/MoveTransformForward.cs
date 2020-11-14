@@ -1,5 +1,4 @@
-﻿using System;
-using DG.Tweening;
+﻿using DG.Tweening;
 using UniRx;
 using UnityEngine;
 
@@ -22,11 +21,14 @@ public class MoveTransformForward : MonoBehaviour
    private void OnEnable()
    {
       PlayerController.onBoost += Boost;
+      PlayerController.onSlow += SlowSpeed;
+      
    }
 
    private void OnDisable()
    {
       PlayerController.onBoost -= Boost;
+      PlayerController.onSlow -= SlowSpeed;
 
    }
 
@@ -53,6 +55,16 @@ public class MoveTransformForward : MonoBehaviour
    public void SlowSpeed()
    {
       SetSpeed(_speed * 0.8f);
+   }
+
+   private void StopMove()
+   {
+      SetSpeed(0);
+   }
+
+   private void StartMove()
+   {
+      NormalSpeed();
    }
 
    public void Boost()

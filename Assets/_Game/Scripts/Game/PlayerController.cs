@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
    public  static Action onBoost;
+   public  static Action onSlow;
 
    [SerializeField] private float _roadWidth;
    [SerializeField] private float _sideSpeed;
@@ -52,7 +53,8 @@ public class PlayerController : MonoBehaviour
    private void Connection()
    {
       MoveCenter();
-      DOVirtual.DelayedCall(0.5f, MoveRight);
+      onSlow?.Invoke();
+      DOVirtual.DelayedCall(0.1f, MoveRight);
       DOVirtual.DelayedCall(0.9f, Boost);
    }
 

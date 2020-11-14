@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 using DG.Tweening;
 using System.Linq;
@@ -21,14 +19,7 @@ public class TimedTrigger : MonoBehaviour
         }
     }
 
-    // private void OnCollisionEnter(Collider other)
-    // {
-    //     if (_tags.Contains(other.gameObject.tag))
-    //     {
-    //         EventTrigger?.Invoke();
-    //         _tween = DOVirtual.DelayedCall(_time, EventPausePast);
-    //     }
-    // }
+   
     private void EventPausePast()
     {
         EventTimePass?.Invoke();

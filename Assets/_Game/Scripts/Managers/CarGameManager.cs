@@ -8,14 +8,17 @@ namespace Game
     public class CarGameManager : MiniGames
     {
         public static event Action sessionFailAction;
+        public static event Action sessionWinAction;
         public static event Action sessionStartAction;
         public static Action<int> OnScoreCountChanged;
         
         [SerializeField] private GameObject _timerPanel;
+        [SerializeField] private GameObject _playerCarPrefab;
         [SerializeField] private TextMeshProUGUI _score;
+        [SerializeField] private int _scoreToWin;
         private int ScoreCount { get; set; }
         // private int _scoreCollectedQty = 0;
-
+        private Transform _player;
         public GameState CurrentGameState{ get; set;}
         
         private void OnEnable()
@@ -34,15 +37,21 @@ namespace Game
         {
             Application.targetFrameRate = 60;
             CurrentGameState = GameState.None;
-            _timerPanel.SetActive(true);
-            // AudioSystem.Instance.PlayMusic(AudioClips.MainTrack);
+          
             ScoreCount = 0;
         }
         
         
+        //Override
         public override void Init()
         {
-            //Load Level
+            _player = Instantiate(_playerCarPrefab).transform;
+            _player.position = new Vector3(-2.116f,0,10);
+            ScoreCount = 0;
+            SetScoreText(ScoreCount);
+            _timerPanel.SetActive(true);
+            CurrentGameState = GameState.Playing;
+            WorldTileManager.Instance.ResetWorld();
         }
         
         public override void Fail()
@@ -56,17 +65,18 @@ namespace Game
         {
             base.Win();
             Debug.Log("WIN");
-
+            Destroy(_player.gameObject);
+            CurrentGameState = GameState.None;
+            LocalSettings.StarsGotQty = ScoreCount;
+            sessionWinAction?.Invoke();            
         }
 
         public void StartGameSession()
         {
-            ScoreCount = 0;
-            SetScoreText(ScoreCount);
-            _timerPanel.SetActive(true);
-            CurrentGameState = GameState.Playing;
+           Init();
             
             sessionStartAction?.Invoke();
+            Debug.Log("StartGameSession?????????????");
         }
         
         public void GameSessionFail()
@@ -76,10 +86,9 @@ namespace Game
             // _timerPanel.SetActive(false);
            
             sessionFailAction?.Invoke();
+            Destroy(_player.gameObject);
             CurrentGameState = GameState.None;
             LocalSettings.StarsGotQty = ScoreCount;
-            
-            sessionFailAction?.Invoke();
         }
        
         public void GameSessionPaused()
@@ -92,7 +101,6 @@ namespace Game
             CurrentGameState = GameState.Playing;
 
         }
-
 
         #region Score
 

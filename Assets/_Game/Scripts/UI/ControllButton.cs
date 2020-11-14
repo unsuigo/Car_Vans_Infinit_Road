@@ -1,15 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ControllButton : MonoBehaviour , IPointerDownHandler
+namespace Game
 {
-    public delegate void ActionTap();
-    public static event ActionTap onTap;
     
-    
-    public void OnPointerDown(PointerEventData eventData)
+//TAP Event
+    public class ControllButton : MonoBehaviour , IPointerDownHandler
     {
-        onTap?.Invoke();
-    }
+        public delegate void ActionTap();
+        public static event ActionTap onTap;
     
+    
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            onTap?.Invoke();
+        }
+    
+    }
+
 }

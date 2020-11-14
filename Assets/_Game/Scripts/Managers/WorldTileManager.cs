@@ -1,48 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using DG.Tweening;
+using Game.Utils;
 using UnityEngine;
 
 namespace Game
 {
     
-    public class WorldTileManager : MonoBehaviour
+    public class WorldTileManager : SingletonT<WorldTileManager>
     {
+        [SerializeField] Transform _cameraTransform;
         [SerializeField] GameObject[] _tilePrefabs;
         [SerializeField] float _zSpawn = 0;
         [SerializeField] float _tileLength = 80;
-        [SerializeField] int _numberOfTiles = 3;
-        private List<GameObject> _activeTiles = new List<GameObject>();
-
-        [SerializeField] Transform _cameraTransform;
+        [SerializeField] int _numberOfActiveTiles = 3;
+        private List<GameObject> _activeTiles;
 
         private GameObject[] _poolTiles;
         private int _nextIndex = 0;
-        void Start()
+
+        private bool _isWorldExist;
+
+        private void Start()
         {
-
             FillTilesPool();
-            for (int i = 0; i < _numberOfTiles; i++)
-            {
-               
-                    SpawnTile(i);
-
-                _nextIndex++;
-            }
-            
         }
+
         void Update()
         {
-            if(_cameraTransform.position.z - _tileLength > _zSpawn -(_numberOfTiles * _tileLength))
+            if (!_isWorldExist)
             {
-                if (_nextIndex > _poolTiles.Length-1)
-                {
-                    _nextIndex = 0;
-                }
-                // Debug.Log("Spawn");
-                SpawnTile(_nextIndex);
-                _nextIndex++;
-                // Debug.Log("_nextIndex " + _nextIndex);
-
-               
+                return;
+            }
+            if(_cameraTransform.position.z - _tileLength > _zSpawn -(_activeTiles.Count * _tileLength))
+            {
                 DeleteLastTile();
             }
             
@@ -58,45 +49,103 @@ namespace Game
                 go.SetActive(false);
                 _poolTiles[i] = go;
             }
-            
+            Debug.Log("FillTilesPool " + _poolTiles.Length);
+
         }
         
         
-        public void SpawnTile(int tileIndex)
+        public void SpawnTile()
         {
-            GameObject go = _poolTiles[tileIndex];
+            Debug.Log("SpawnTile " + _nextIndex);
+            GameObject go = _poolTiles[_nextIndex];
             go.SetActive(true);
-            // Debug.Log("SpawnTile " + tileIndex);
-
             var spawnPosition = transform.position;
             spawnPosition.z +=  _zSpawn;
             go.transform.position = spawnPosition;
             
-            // GameObject go = Instantiate(tilePrefabs[tileIndex], transform.forward * zSpawn, transform.rotation);
+            Debug.Log("spawnPosition " + spawnPosition);
+
             _activeTiles.Add(go);
-            // Debug.Log("activeTiles added " + activeTiles.Count);
-
-            _zSpawn += _tileLength;
-
-            foreach (var tile in _activeTiles)
+            Debug.Log("activeTiles added " + _activeTiles.Count);
+           
+            for (int i = 0; i < _activeTiles.Count; i++)
             {
-                if (!tile.activeSelf)
+                Debug.Log("1-WTF " + _activeTiles[i].activeSelf);
+                if (!_activeTiles[i].activeSelf)
                 {
-                    tile.SetActive(true);
-                    Debug.Log("WTF ");
-
+                    _activeTiles[i].SetActive(true);
+                    Debug.Log("WTF " + _activeTiles[i].activeSelf);
+            
                 }
+            }
+            _zSpawn += _tileLength;
+            _nextIndex++;
+            if (_nextIndex > _poolTiles.Length-1)
+            {
+                _nextIndex = 0;
             }
         }
 
         private void DeleteLastTile()
         {
             // Destroy(activeTiles[0]);
-            var tile = _activeTiles[0];
-            _activeTiles.RemoveAt(0);
-            // Debug.Log("activeTiles removed " + activeTiles.Count);
+            if (_activeTiles.Count > 0)
+            {
+                var tile = _activeTiles[0];
+                _activeTiles.RemoveAt(0);
+                tile.SetActive(false);
+                Debug.Log("activeTiles removed at 0  activity is " + tile.activeSelf);
+            }
+            
+            SpawnTile();
+            if (_activeTiles.Count < _numberOfActiveTiles)
+            {
+                Debug.Log("spawn again WTF count" + _activeTiles.Count);
 
-            tile.SetActive(false);
+                SpawnTile();
+            }
+        }
+
+        public void ResetWorld()
+        {
+            DeleteWorld();
+            DOVirtual.DelayedCall(0.05f, BuilWorld);
+        }
+
+        private void DeleteWorld()
+        {
+            if (!_isWorldExist)
+            {
+                return;
+            }
+            
+            _isWorldExist = false;
+            Debug.Log("Destroy world !!!!!!!!!");
+
+            if (_poolTiles.Length > 0)
+            {
+                foreach (var tile in _poolTiles)
+                {
+                    tile.SetActive(false);
+                    tile.transform.position = Vector3.zero;
+                }
+            }
+            
+            _zSpawn = 0;
+            _nextIndex = 0;
+            
+        }
+
+        private void BuilWorld()
+        {
+            _activeTiles = new List<GameObject>();
+            
+            for (int i = 0; i < _numberOfActiveTiles; i++)
+            {
+                SpawnTile();
+            }
+
+            _isWorldExist = true;
         }
         
     }   
